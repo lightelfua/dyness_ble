@@ -73,6 +73,7 @@ class DynessBLECoordinator(DataUpdateCoordinator[dict[str, Any]]):
         self.connected = False
         self._task: asyncio.Task[None] | None = None
         self._last_notify = 0.0
+        self._last_error: str | None = None
 
     # ------------------------------------------------------------------ API
 
@@ -123,7 +124,11 @@ class DynessBLECoordinator(DataUpdateCoordinator[dict[str, Any]]):
             except asyncio.CancelledError:
                 raise
             except (BleakNotFoundError, BleakError, TimeoutError, OSError) as err:
-                _LOGGER.debug("%s: connection problem: %s", self.address, err)
+                # Warn once per distinct error, then fall back to debug.
+                message = f"{type(err).__name__}: {err}"
+                level = logging.DEBUG if message == self._last_error else logging.WARNING
+                self._last_error = message
+                _LOGGER.log(level, "%s: cannot connect: %s", self.address, message)
             except Exception:  # noqa: BLE001
                 _LOGGER.exception("%s: unexpected error", self.address)
             finally:
@@ -178,10 +183,22 @@ class DynessBLECoordinator(DataUpdateCoordinator[dict[str, Any]]):
             if not present:
                 raise BleakError("device exposes none of the expected characteristics")
 
+            # Characteristics whose notify can't be enabled are polled instead.
+            polled: list[tuple[str, str]] = []
             for key, uuid in present:
-                await client.start_notify(uuid, self._make_notify_cb(key))
+                try:
+                    await client.start_notify(uuid, self._make_notify_cb(key))
+                except (BleakError, TimeoutError, OSError, ValueError) as err:
+                    _LOGGER.warning(
+                        "%s: notify unavailable for %s (%s), polling instead",
+                        self.address,
+                        key,
+                        err,
+                    )
+                    polled.append((key, uuid))
 
             self._last_notify = time.monotonic()
+            self._last_error = None
             self._set_connected(True)
             _LOGGER.debug("%s: connected, %d characteristics", self.address, len(present))
 
@@ -194,9 +211,17 @@ class DynessBLECoordinator(DataUpdateCoordinator[dict[str, Any]]):
                     continue
                 self._handle_payload(key, payload)
 
+            wait = 5 if polled else STALE_TIMEOUT / 2
             while not disconnected.is_set():
                 with suppress(TimeoutError):
-                    await asyncio.wait_for(disconnected.wait(), timeout=STALE_TIMEOUT / 2)
+                    await asyncio.wait_for(disconnected.wait(), timeout=wait)
+                if disconnected.is_set():
+                    break
+                for key, uuid in polled:
+                    try:
+                        self._handle_payload(key, await client.read_gatt_char(uuid))
+                    except BleakError as err:
+                        _LOGGER.debug("%s: poll %s failed: %s", self.address, key, err)
                 if time.monotonic() - self._last_notify > STALE_TIMEOUT:
                     _LOGGER.debug("%s: no notifications, reconnecting", self.address)
                     break
