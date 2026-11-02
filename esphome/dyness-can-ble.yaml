@@ -1,0 +1,689 @@
+substitutions:
+  device_name: "ble-dyness-can"
+  friendlyname: "Dyness CAN BLE"
+
+esphome:
+  name: ${device_name}
+  friendly_name: ${friendlyname}
+
+esp32:
+  board: esp32-h2-devkitm-1
+  variant: esp32h2
+  framework:
+    type: esp-idf
+
+#logger:
+#  level: DEBUG
+#  hardware_uart: USB_SERIAL_JTAG
+
+logger:
+  level: WARN
+  hardware_uart: UART0
+  baud_rate: 115200
+
+# BLE GATT Server
+esp32_ble:
+  max_connections: 1
+  disable_bt_logs: true
+
+esp32_ble_server:
+  manufacturer: "DIY"
+  model: "Dyness CAN BLE"
+  max_clients: 1
+
+  services:
+    - uuid: "7aab0001-7aab-4535-af3e-ee76a35cc42d"
+      advertise: true
+      characteristics:
+
+        # Напруга акумулятора
+        # (value НЕ задаємо тут: шаблонне value обчислюється лише раз при старті,
+        #  тому оновлюємо через ble_server.characteristic.set_value в interval нижче)
+        - id: ble_voltage
+          uuid: "7aab0002-7aab-4535-af3e-ee76a35cc42d"
+          description: "Battery Voltage"
+          read: true
+          notify: true
+
+        # Струм акумулятора
+        # (value НЕ задаємо тут: шаблонне value обчислюється лише раз при старті,
+        #  тому оновлюємо через ble_server.characteristic.set_value в interval нижче)
+        - id: ble_current
+          uuid: "7aab0003-7aab-4535-af3e-ee76a35cc42d"
+          description: "Battery Current"
+          read: true
+          notify: true
+
+        # Потужність
+        # (value НЕ задаємо тут: шаблонне value обчислюється лише раз при старті,
+        #  тому оновлюємо через ble_server.characteristic.set_value в interval нижче)
+        - id: ble_power
+          uuid: "7aab0004-7aab-4535-af3e-ee76a35cc42d"
+          description: "Battery Power"
+          read: true
+          notify: true
+
+        # SOC
+        # (value НЕ задаємо тут: шаблонне value обчислюється лише раз при старті,
+        #  тому оновлюємо через ble_server.characteristic.set_value в interval нижче)
+        - id: ble_soc
+          uuid: "7aab0005-7aab-4535-af3e-ee76a35cc42d"
+          description: "Battery SOC"
+          read: true
+          notify: true
+
+        # SOH
+        # (value НЕ задаємо тут: шаблонне value обчислюється лише раз при старті,
+        #  тому оновлюємо через ble_server.characteristic.set_value в interval нижче)
+        - id: ble_soh
+          uuid: "7aab0006-7aab-4535-af3e-ee76a35cc42d"
+          description: "Battery SOH"
+          read: true
+          notify: true
+
+        # Температура
+        # (value НЕ задаємо тут: шаблонне value обчислюється лише раз при старті,
+        #  тому оновлюємо через ble_server.characteristic.set_value в interval нижче)
+        - id: ble_temperature
+          uuid: "7aab0007-7aab-4535-af3e-ee76a35cc42d"
+          description: "Battery Temperature"
+          read: true
+          notify: true
+
+        # Напруга заряду
+        # (value НЕ задаємо тут: шаблонне value обчислюється лише раз при старті,
+        #  тому оновлюємо через ble_server.characteristic.set_value в interval нижче)
+        - id: ble_charge_voltage
+          uuid: "7aab0008-7aab-4535-af3e-ee76a35cc42d"
+          description: "Charge Voltage Limit"
+          read: true
+          notify: true
+
+        # Струм заряду
+        # (value НЕ задаємо тут: шаблонне value обчислюється лише раз при старті,
+        #  тому оновлюємо через ble_server.characteristic.set_value в interval нижче)
+        - id: ble_charge_current
+          uuid: "7aab0009-7aab-4535-af3e-ee76a35cc42d"
+          description: "Charge Current Limit"
+          read: true
+          notify: true
+
+        # Струм розряду
+        # (value НЕ задаємо тут: шаблонне value обчислюється лише раз при старті,
+        #  тому оновлюємо через ble_server.characteristic.set_value в interval нижче)
+        - id: ble_discharge_current
+          uuid: "7aab000a-7aab-4535-af3e-ee76a35cc42d"
+          description: "Discharge Current Limit"
+          read: true
+          notify: true
+
+        # Напруга розряду
+        # (value НЕ задаємо тут: шаблонне value обчислюється лише раз при старті,
+        #  тому оновлюємо через ble_server.characteristic.set_value в interval нижче)
+        - id: ble_discharge_voltage
+          uuid: "7aab000b-7aab-4535-af3e-ee76a35cc42d"
+          description: "Discharge Voltage Limit"
+          read: true
+          notify: true
+
+        # Залишкова ємність
+        # (value НЕ задаємо тут: шаблонне value обчислюється лише раз при старті,
+        #  тому оновлюємо через ble_server.characteristic.set_value в interval нижче)
+        - id: ble_capacity
+          uuid: "7aab000c-7aab-4535-af3e-ee76a35cc42d"
+          description: "Remaining Capacity Ah"
+          read: true
+          notify: true
+
+        # Зарядна потужність
+        # (value НЕ задаємо тут: шаблонне value обчислюється лише раз при старті,
+        #  тому оновлюємо через ble_server.characteristic.set_value в interval нижче)
+        - id: ble_charging_power
+          uuid: "7aab000d-7aab-4535-af3e-ee76a35cc42d"
+          description: "Charging Power"
+          read: true
+          notify: true
+
+        # Потужність розряду
+        # (value НЕ задаємо тут: шаблонне value обчислюється лише раз при старті,
+        #  тому оновлюємо через ble_server.characteristic.set_value в interval нижче)
+        - id: ble_discharging_power
+          uuid: "7aab000e-7aab-4535-af3e-ee76a35cc42d"
+          description: "Discharging Power"
+          read: true
+          notify: true
+
+        # Назва акумулятора
+        # (value НЕ задаємо тут: шаблонне value обчислюється лише раз при старті,
+        #  тому оновлюємо через ble_server.characteristic.set_value в interval нижче)
+        - id: ble_battery_name
+          uuid: "7aab000f-7aab-4535-af3e-ee76a35cc42d"
+          description: "Battery Name"
+          read: true
+          notify: true
+
+# Вбудований CAN контролер ESP32-H2 (TWAI)
+canbus:
+  - platform: esp32_can
+    id: dyness_can
+    tx_pin: GPIO4
+    rx_pin: GPIO5
+    can_id: 4
+    bit_rate: 500kbps
+    mode: LISTENONLY
+
+    on_frame:
+
+      - can_id: 0x351
+        then:
+          - lambda: |-
+              const uint16_t charge_voltage_raw =
+                  (uint16_t)x[1] << 8 | x[0];
+ 
+              const uint16_t charge_current_raw =
+                  (uint16_t)x[3] << 8 | x[2];
+
+              const uint16_t discharge_current_raw =
+                  (uint16_t)x[5] << 8 | x[4];
+
+              const uint16_t discharge_voltage_raw =
+                  (uint16_t)x[7] << 8 | x[6];
+
+              const float charge_voltage = charge_voltage_raw / 10.0f;
+              const float charge_current = charge_current_raw / 10.0f;
+              const float discharge_current = discharge_current_raw / 10.0f;
+              const float discharge_voltage = discharge_voltage_raw / 10.0f;
+
+              id(dyness_charge_voltage).publish_state(charge_voltage);
+              id(dyness_charge_current_limit).publish_state(charge_current);
+              id(dyness_discharge_current_limit).publish_state(discharge_current);
+              id(dyness_discharge_voltage).publish_state(discharge_voltage);
+
+      # 0x355 - SOC / SOH
+
+      - can_id: 0x355
+        then:
+          - lambda: |-
+              const float soc = (uint16_t)x[1] << 8 | x[0];
+              id(dyness_soc).publish_state(soc);
+
+              const float soh = (uint16_t)x[3] << 8 | x[2];
+              id(dyness_soh).publish_state(soh);
+
+      - can_id: 0x356
+        then:
+          - lambda: |-
+              const uint16_t voltage_raw =
+                  (uint16_t)x[1] << 8 | x[0];
+
+              const int16_t current_raw =
+                  (int16_t)((uint16_t)x[3] << 8 | x[2]);
+
+              const int16_t temperature_raw =
+                  (int16_t)((uint16_t)x[5] << 8 | x[4]);
+
+              const float voltage = voltage_raw / 100.0f;
+              const float current = current_raw / 10.0f;
+              const float temperature = temperature_raw / 10.0f;
+              const float power = voltage * current;
+
+              id(dyness_total_voltage).publish_state(voltage);
+              id(dyness_current).publish_state(current);
+              id(dyness_power).publish_state(power);
+              id(dyness_temperature).publish_state(temperature);
+
+      # 0x359 - Protection / Alarm Flags
+      - can_id: 0x359
+        then:
+          - lambda: |-
+              // Protection - Byte 0
+              id(dyness_protection_discharge_overcurrent).publish_state(
+                (x[0] & 0x80) != 0);
+
+              id(dyness_protection_cell_undertemperature).publish_state(
+                (x[0] & 0x10) != 0);
+
+              id(dyness_protection_cell_overtemperature).publish_state(
+                (x[0] & 0x08) != 0);
+
+              id(dyness_protection_undervoltage).publish_state(
+                (x[0] & 0x04) != 0);
+
+              id(dyness_protection_overvoltage).publish_state(
+                (x[0] & 0x02) != 0);
+
+              // Protection - Byte 1
+              id(dyness_protection_system_error).publish_state(
+                (x[1] & 0x08) != 0);
+
+              id(dyness_protection_charge_overcurrent).publish_state(
+                (x[1] & 0x01) != 0);
+
+              // Alarm - Byte 2
+              id(dyness_alarm_discharge_highcurrent).publish_state(
+                (x[2] & 0x80) != 0);
+
+              id(dyness_alarm_cell_lowtemperature).publish_state(
+                (x[2] & 0x10) != 0);
+
+              id(dyness_alarm_cell_hightemperature).publish_state(
+                (x[2] & 0x08) != 0);
+
+              id(dyness_alarm_undervoltage).publish_state(
+                (x[2] & 0x04) != 0);
+
+              id(dyness_alarm_overvoltage).publish_state(
+                (x[2] & 0x02) != 0);
+
+              // Alarm - Byte 3
+              id(dyness_alarm_internal_communication).publish_state(
+                (x[3] & 0x08) != 0);
+
+              id(dyness_alarm_charge_highcurrent).publish_state(
+                (x[3] & 0x01) != 0);
+
+              // Module count - Byte 4
+              id(dyness_module_count).publish_state(x[4]);
+
+      # 0x35F - Battery Information
+      - can_id: 0x35F
+        then:
+          - lambda: |-
+              const uint16_t capacity_raw =
+                  (uint16_t)x[5] << 8 | x[4];
+
+              const float remaining_capacity = capacity_raw;
+              id(dyness_capacity).publish_state(remaining_capacity);
+
+      # 0x370 - Назва батареї
+      - can_id: 0x370
+        use_extended_id: false
+        then:
+          - lambda: |-
+              std::string name(x.begin(), x.end());
+              id(battery_name).publish_state(name);
+
+# Сенсори Dyness
+sensor:
+  - platform: template
+    name: "Dyness Charge Voltage"
+    id: dyness_charge_voltage
+    unit_of_measurement: "V"
+    accuracy_decimals: 1
+    device_class: voltage
+
+  - platform: template
+    name: "Dyness Charge Current Limit"
+    id: dyness_charge_current_limit
+    unit_of_measurement: "A"
+    accuracy_decimals: 0
+    device_class: current
+
+  - platform: template
+    name: "Dyness Discharge Current Limit"
+    id: dyness_discharge_current_limit
+    unit_of_measurement: "A"
+    accuracy_decimals: 0
+    device_class: current
+
+  - platform: template
+    name: "Dyness Discharge Voltage"
+    id: dyness_discharge_voltage
+    unit_of_measurement: "V"
+    accuracy_decimals: 1
+    device_class: voltage
+
+  - platform: template
+    name: "Dyness SOC"
+    id: dyness_soc
+    unit_of_measurement: "%"
+    accuracy_decimals: 0
+    device_class: battery
+
+  - platform: template
+    name: "Dyness SOH"
+    id: dyness_soh
+    unit_of_measurement: "%"
+    accuracy_decimals: 0
+
+  - platform: template
+    name: "Dyness Total Voltage"
+    id: dyness_total_voltage
+    unit_of_measurement: "V"
+    accuracy_decimals: 2
+    device_class: voltage
+
+  - platform: template
+    name: "Dyness Current"
+    id: dyness_current
+    unit_of_measurement: "A"
+    accuracy_decimals: 1
+    device_class: current
+
+  - platform: template
+    name: "Dyness Power"
+    id: dyness_power
+    unit_of_measurement: "W"
+    accuracy_decimals: 0
+    device_class: power
+    state_class: measurement
+
+  - platform: template
+    name: "Dyness Temperature"
+    id: dyness_temperature
+    unit_of_measurement: "°C"
+    accuracy_decimals: 1
+    device_class: temperature
+
+  - platform: template
+    name: "Dyness Remaining Capacity Ah"
+    id: dyness_capacity
+    unit_of_measurement: "Ah"
+    accuracy_decimals: 0
+    state_class: measurement
+
+  - platform: template
+    name: "Dyness Remaining Capacity"
+    id: dyness_capacity_kwh
+    unit_of_measurement: "kWh"
+    device_class: energy
+    state_class: measurement
+    accuracy_decimals: 2
+    lambda: |-
+      return id(dyness_capacity).state * 51.2f / 1000.0f;
+
+  - platform: template
+    name: "Dyness Full Capacity Ah"
+    id: dyness_full_capacity_ah
+    unit_of_measurement: "Ah"
+    icon: mdi:battery
+    accuracy_decimals: 0
+    lambda: return 314.0f;
+    update_interval: 60s
+
+  - platform: template
+    name: "Dyness Full Capacity"
+    id: dyness_full_capacity_wh
+    unit_of_measurement: "kWh"
+    device_class: energy
+    state_class: measurement
+    icon: mdi:battery-high
+    accuracy_decimals: 2
+    lambda: return 16.08f;
+    update_interval: 60s
+
+  - platform: template
+    name: "Dyness Charging Power"
+    id: dyness_charging_power
+    unit_of_measurement: "W"
+    device_class: power
+    state_class: measurement
+    accuracy_decimals: 0
+    lambda: |-
+      const float power = id(dyness_power).state;
+      if (isnan(power)) return NAN;
+      return power > 0 ? power : 0.0f;
+    update_interval: 5s
+    on_value:
+      then:
+        - logger.log:
+            format: "Charging Power: %.0f W"
+            args: [ 'x' ]
+
+  - platform: template
+    name: "Dyness Discharging Power"
+    id: dyness_discharging_power
+    unit_of_measurement: "W"
+    device_class: power
+    state_class: measurement
+    accuracy_decimals: 0
+    lambda: |-
+      const float power = id(dyness_power).state;
+      if (isnan(power)) return NAN;
+      return power < 0 ? -power : 0.0f;
+    update_interval: 5s
+    on_value:
+      then:
+        - logger.log:
+            format: "Discharging Power: %.0f W"
+            args: [ 'x' ]
+
+  - platform: template
+    id: dyness_module_count
+    name: "Dyness Module Count"
+    accuracy_decimals: 0
+    entity_category: diagnostic
+    state_class: measurement
+
+
+# Аварійні бінарні сенсори
+
+binary_sensor:
+  - platform: template
+    name: "Dyness Cell Under Temperature Charge"
+    id: cell_under_temp_charge
+
+  - platform: template
+    name: "Dyness Cell Over Temperature Charge"
+    id: cell_over_temp_charge
+
+  - platform: template
+    name: "Dyness Discharge Over Current"
+    id: discharge_over_current
+
+  - platform: template
+    name: "Dyness Charge Over Current"
+    id: charge_over_current
+
+  - platform: template
+    name: "Dyness Module Under Voltage"
+    id: module_under_voltage
+
+  - platform: template
+    name: "Dyness Module Over Voltage"
+    id: module_over_voltage
+
+  - platform: template
+    name: "Dyness Cell Under Voltage"
+    id: cell_under_voltage
+
+  - platform: template
+    name: "Dyness Cell Over Voltage"
+    id: cell_over_voltage
+
+  - platform: template
+    name: "Dyness Heating Film Active"
+    id: heating_film_active
+    device_class: heat
+
+  - platform: template
+    name: "Dyness MOS Over Temperature"
+    id: mos_over_temperature
+
+  - platform: template
+    name: "Dyness Cell Under Temperature Discharge"
+    id: cell_under_temp_discharge
+
+  - platform: template
+    name: "Dyness Cell Over Temperature Discharge"
+    id: cell_over_temp_discharge
+
+  - platform: template
+    id: dyness_protection_discharge_overcurrent
+    name: "Dyness Protection Discharge Overcurrent"
+    device_class: problem
+    entity_category: diagnostic
+
+  - platform: template
+    id: dyness_protection_cell_undertemperature
+    name: "Dyness Protection Cell Under Temperature"
+    device_class: problem
+    entity_category: diagnostic
+
+  - platform: template
+    id: dyness_protection_cell_overtemperature
+    name: "Dyness Protection Cell Over Temperature"
+    device_class: problem
+    entity_category: diagnostic
+
+  - platform: template
+    id: dyness_protection_undervoltage
+    name: "Dyness Protection Under Voltage"
+    device_class: problem
+    entity_category: diagnostic
+
+  - platform: template
+    id: dyness_protection_overvoltage
+    name: "Dyness Protection Over Voltage"
+    device_class: problem
+    entity_category: diagnostic
+
+  - platform: template
+    id: dyness_protection_system_error
+    name: "Dyness Protection System Error"
+    device_class: problem
+    entity_category: diagnostic
+
+  - platform: template
+    id: dyness_protection_charge_overcurrent
+    name: "Dyness Protection Charge Overcurrent"
+    device_class: problem
+    entity_category: diagnostic
+
+  - platform: template
+    id: dyness_alarm_discharge_highcurrent
+    name: "Dyness Alarm Discharge High Current"
+    device_class: problem
+    entity_category: diagnostic
+
+  - platform: template
+    id: dyness_alarm_cell_lowtemperature
+    name: "Dyness Alarm Cell Low Temperature"
+    device_class: problem
+    entity_category: diagnostic
+
+  - platform: template
+    id: dyness_alarm_cell_hightemperature
+    name: "Dyness Alarm Cell High Temperature"
+    device_class: problem
+    entity_category: diagnostic
+
+  - platform: template
+    id: dyness_alarm_undervoltage
+    name: "Dyness Alarm Under Voltage"
+    device_class: problem
+    entity_category: diagnostic
+
+  - platform: template
+    id: dyness_alarm_overvoltage
+    name: "Dyness Alarm Over Voltage"
+    device_class: problem
+    entity_category: diagnostic
+
+  - platform: template
+    id: dyness_alarm_internal_communication
+    name: "Dyness Alarm Internal Communication"
+    device_class: problem
+    entity_category: diagnostic
+
+  - platform: template
+    id: dyness_alarm_charge_highcurrent
+    name: "Dyness Alarm Charge High Current"
+    device_class: problem
+    entity_category: diagnostic
+
+text_sensor:
+  - platform: template
+    name: "Dyness Battery Name"
+    id: battery_name
+
+# BLE: щоп'ять секунд кладемо свіже значення в характеристику і шлемо notify
+interval:
+  - interval: 5s
+    then:
+      - ble_server.characteristic.set_value:
+          id: ble_voltage
+          value:
+            data: !lambda 'return bytebuffer::ByteBuffer::wrap(id(dyness_total_voltage).state).get_data();'
+      - ble_server.characteristic.notify:
+          id: ble_voltage
+      - ble_server.characteristic.set_value:
+          id: ble_current
+          value:
+            data: !lambda 'return bytebuffer::ByteBuffer::wrap(id(dyness_current).state).get_data();'
+      - ble_server.characteristic.notify:
+          id: ble_current
+      - ble_server.characteristic.set_value:
+          id: ble_power
+          value:
+            data: !lambda 'return bytebuffer::ByteBuffer::wrap(id(dyness_power).state).get_data();'
+      - ble_server.characteristic.notify:
+          id: ble_power
+      - ble_server.characteristic.set_value:
+          id: ble_soc
+          value:
+            data: !lambda 'return bytebuffer::ByteBuffer::wrap(id(dyness_soc).state).get_data();'
+      - ble_server.characteristic.notify:
+          id: ble_soc
+      - ble_server.characteristic.set_value:
+          id: ble_soh
+          value:
+            data: !lambda 'return bytebuffer::ByteBuffer::wrap(id(dyness_soh).state).get_data();'
+      - ble_server.characteristic.notify:
+          id: ble_soh
+      - ble_server.characteristic.set_value:
+          id: ble_temperature
+          value:
+            data: !lambda 'return bytebuffer::ByteBuffer::wrap(id(dyness_temperature).state).get_data();'
+      - ble_server.characteristic.notify:
+          id: ble_temperature
+      - ble_server.characteristic.set_value:
+          id: ble_charge_voltage
+          value:
+            data: !lambda 'return bytebuffer::ByteBuffer::wrap(id(dyness_charge_voltage).state).get_data();'
+      - ble_server.characteristic.notify:
+          id: ble_charge_voltage
+      - ble_server.characteristic.set_value:
+          id: ble_charge_current
+          value:
+            data: !lambda 'return bytebuffer::ByteBuffer::wrap(id(dyness_charge_current_limit).state).get_data();'
+      - ble_server.characteristic.notify:
+          id: ble_charge_current
+      - ble_server.characteristic.set_value:
+          id: ble_discharge_current
+          value:
+            data: !lambda 'return bytebuffer::ByteBuffer::wrap(id(dyness_discharge_current_limit).state).get_data();'
+      - ble_server.characteristic.notify:
+          id: ble_discharge_current
+      - ble_server.characteristic.set_value:
+          id: ble_discharge_voltage
+          value:
+            data: !lambda 'return bytebuffer::ByteBuffer::wrap(id(dyness_discharge_voltage).state).get_data();'
+      - ble_server.characteristic.notify:
+          id: ble_discharge_voltage
+      - ble_server.characteristic.set_value:
+          id: ble_capacity
+          value:
+            data: !lambda 'return bytebuffer::ByteBuffer::wrap(id(dyness_capacity).state).get_data();'
+      - ble_server.characteristic.notify:
+          id: ble_capacity
+      - ble_server.characteristic.set_value:
+          id: ble_charging_power
+          value:
+            data: !lambda 'return bytebuffer::ByteBuffer::wrap(id(dyness_charging_power).state).get_data();'
+      - ble_server.characteristic.notify:
+          id: ble_charging_power
+      - ble_server.characteristic.set_value:
+          id: ble_discharging_power
+          value:
+            data: !lambda 'return bytebuffer::ByteBuffer::wrap(id(dyness_discharging_power).state).get_data();'
+      - ble_server.characteristic.notify:
+          id: ble_discharging_power
+      - ble_server.characteristic.set_value:
+          id: ble_battery_name
+          value:
+            data: !lambda |-
+              const std::string name = id(battery_name).state;
+              return std::vector<uint8_t>(name.begin(), name.end());
+      - ble_server.characteristic.notify:
+          id: ble_battery_name

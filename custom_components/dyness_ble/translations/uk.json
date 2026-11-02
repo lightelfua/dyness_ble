@@ -1,0 +1,51 @@
+{
+  "config": {
+    "flow_title": "{name}",
+    "step": {
+      "user": {
+        "title": "Dyness CAN BLE",
+        "description": "Виберіть ESP32-шлюз, знайдений через Bluetooth.",
+        "data": {
+          "address": "Пристрій"
+        }
+      },
+      "manual": {
+        "title": "Dyness CAN BLE",
+        "description": "Шлюз не знайдено автоматично. Введіть його Bluetooth MAC-адресу (пристрій має бути в зоні дії Bluetooth-адаптера або ESPHome Bluetooth proxy).",
+        "data": {
+          "address": "MAC-адреса"
+        }
+      },
+      "bluetooth_confirm": {
+        "description": "Налаштувати {name}?"
+      }
+    },
+    "error": {
+      "invalid_address": "Неправильна MAC-адреса. Формат: AA:BB:CC:DD:EE:FF.",
+      "not_found": "Home Assistant зараз не бачить цей пристрій через Bluetooth."
+    },
+    "abort": {
+      "already_configured": "Цей пристрій уже налаштовано.",
+      "already_in_progress": "Налаштування вже виконується."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "voltage": { "name": "Напруга" },
+      "current": { "name": "Струм" },
+      "power": { "name": "Потужність" },
+      "soc": { "name": "Рівень заряду" },
+      "soh": { "name": "Стан здоров'я" },
+      "temperature": { "name": "Температура" },
+      "remaining_capacity": { "name": "Залишкова ємність" },
+      "remaining_energy": { "name": "Залишкова енергія" },
+      "charging_power": { "name": "Потужність заряду" },
+      "discharging_power": { "name": "Потужність розряду" },
+      "charge_voltage_limit": { "name": "Ліміт напруги заряду" },
+      "charge_current_limit": { "name": "Ліміт струму заряду" },
+      "discharge_current_limit": { "name": "Ліміт струму розряду" },
+      "discharge_voltage_limit": { "name": "Ліміт напруги розряду" },
+      "battery_name": { "name": "Назва акумулятора" }
+    }
+  }
+}

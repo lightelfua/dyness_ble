@@ -1,0 +1,23 @@
+{
+  "domain": "dyness_ble",
+  "name": "Dyness CAN BLE",
+  "bluetooth": [
+    {
+      "service_uuid": "7aab0001-7aab-4535-af3e-ee76a35cc42d",
+      "connectable": true
+    },
+    {
+      "local_name": "ble-dyness-can*",
+      "connectable": true
+    }
+  ],
+  "codeowners": [],
+  "config_flow": true,
+  "dependencies": ["bluetooth_adapters"],
+  "documentation": "https://github.com/your-name/ha-dyness-ble",
+  "integration_type": "device",
+  "iot_class": "local_push",
+  "issue_tracker": "https://github.com/your-name/ha-dyness-ble/issues",
+  "requirements": ["bleak-retry-connector>=3.5.0"],
+  "version": "1.0.0"
+}

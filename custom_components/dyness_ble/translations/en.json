@@ -1,0 +1,51 @@
+{
+  "config": {
+    "flow_title": "{name}",
+    "step": {
+      "user": {
+        "title": "Dyness CAN BLE",
+        "description": "Choose the ESP32 gateway found by Bluetooth.",
+        "data": {
+          "address": "Device"
+        }
+      },
+      "manual": {
+        "title": "Dyness CAN BLE",
+        "description": "No gateway was discovered automatically. Enter its Bluetooth MAC address (it must be in range of a Bluetooth adapter or an ESPHome Bluetooth proxy).",
+        "data": {
+          "address": "MAC address"
+        }
+      },
+      "bluetooth_confirm": {
+        "description": "Do you want to set up {name}?"
+      }
+    },
+    "error": {
+      "invalid_address": "Invalid MAC address. Use the format AA:BB:CC:DD:EE:FF.",
+      "not_found": "The device is not visible to Home Assistant Bluetooth right now."
+    },
+    "abort": {
+      "already_configured": "This device is already configured.",
+      "already_in_progress": "Configuration is already in progress."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "voltage": { "name": "Voltage" },
+      "current": { "name": "Current" },
+      "power": { "name": "Power" },
+      "soc": { "name": "State of charge" },
+      "soh": { "name": "State of health" },
+      "temperature": { "name": "Temperature" },
+      "remaining_capacity": { "name": "Remaining capacity" },
+      "remaining_energy": { "name": "Remaining energy" },
+      "charging_power": { "name": "Charging power" },
+      "discharging_power": { "name": "Discharging power" },
+      "charge_voltage_limit": { "name": "Charge voltage limit" },
+      "charge_current_limit": { "name": "Charge current limit" },
+      "discharge_current_limit": { "name": "Discharge current limit" },
+      "discharge_voltage_limit": { "name": "Discharge voltage limit" },
+      "battery_name": { "name": "Battery name" }
+    }
+  }
+}
